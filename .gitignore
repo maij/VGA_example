@@ -1,0 +1,11 @@
+*.lso
+*.gise
+*.xise
+*.xmsgs
+*.cmd
+*.projectmgr
+*.xreport
+*.sdb
+*.prj
+*.bin
+*.html
