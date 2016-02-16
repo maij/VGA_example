@@ -1,5 +1,6 @@
 `timescale 1ns / 10ps
 `include "vga_defs.v"
+`include "pack_array.v"
 
 ////////////////////////////////////////////////////////////////////////////////
 // Company: 
@@ -41,16 +42,18 @@ module main_tbw;
 		.resetn(resetn), 
 		.packed_buffer(packed_buffer)
 	);
+
+	`UNPACK_2D_ARRAY(`WIDTH, `HEIGHT, `PIXEL_SIZE, packed_buffer, buffer);
 	
-	genvar i, j;
-	
-	generate 
-		for (i = 0; i < `HEIGHT; i = i + 1) begin : vertical_raster
-			for (j = 0; j < `WIDTH; j = j + 1) begin : horizontal_raster
-				assign buffer[i][j] = packed_buffer[(i*`WIDTH + j)*`PIXEL_SIZE];
-			end
-		end
-	endgenerate
+//	genvar i, j;
+//	
+//	generate 
+//		for (i = 0; i < `HEIGHT; i = i + 1) begin : vertical_raster
+//			for (j = 0; j < `WIDTH; j = j + 1) begin : horizontal_raster
+//				assign buffer[i][j] = packed_buffer[(i*`WIDTH + j)*`PIXEL_SIZE];
+//			end
+//		end
+//	endgenerate
 
 	initial begin
 		// Initialize Inputs
