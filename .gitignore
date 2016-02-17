@@ -10,3 +10,7 @@
 *.bin
 *.html
 *.ini
+*.cmd_log
+*.syr
+*.xrpt
+*.xml
