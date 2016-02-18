@@ -14,3 +14,4 @@
 *.syr
 *.xrpt
 *.xml
+DoubleBuffer/isim/*

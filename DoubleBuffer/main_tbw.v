@@ -29,31 +29,39 @@ module main_tbw;
 	// Inputs
 	reg clk;
 	reg resetn;
-
+	
+	function integer log2;
+		input integer value;
+		begin		
+			value = value-1;
+			for (log2=0; value>0; log2=log2+1)
+				value = value>>1;
+		end
+	endfunction
+	
 	// Outputs
-	wire [2457599:0] packed_buffer;
-
+	wire [`PACKED_SIZE-1:0] packed_buffer;
+	wire [log2(`HEIGHT):0] hline_sel;
+	
 	// Internal Variables
-	wire [`PIXEL_SIZE-1:0] buffer [`HEIGHT-1:0][`WIDTH-1:0];
+	wire [`PIXEL_SIZE-1:0] buffer [`WIDTH-1:0];
 	
 	// Instantiate the Unit Under Test (UUT)
 	main uut (
 		.clk(clk), 
 		.resetn(resetn), 
-		.packed_buffer(packed_buffer)
+		.packed_buffer(packed_buffer),
+		.hline_sel(hline_sel)
 	);
 
-	`UNPACK_2D_ARRAY(`WIDTH, `HEIGHT, `PIXEL_SIZE, packed_buffer, buffer);
+	//`UNPACK_2D_ARRAY(`WIDTH, `HEIGHT, `PIXEL_SIZE, packed_buffer, buffer);
 	
-//	genvar i, j;
-//	
-//	generate 
-//		for (i = 0; i < `HEIGHT; i = i + 1) begin : vertical_raster
-//			for (j = 0; j < `WIDTH; j = j + 1) begin : horizontal_raster
-//				assign buffer[i][j] = packed_buffer[(i*`WIDTH + j)*`PIXEL_SIZE];
-//			end
-//		end
-//	endgenerate
+	generate 
+	genvar j;
+		for (j = 0; j < `WIDTH; j = j + 1) begin : horizontal_raster
+			assign buffer[j][`PIXEL_SIZE-1:0] = packed_buffer[(j+1)*`PIXEL_SIZE-1:j*`PIXEL_SIZE];
+		end
+	endgenerate
 
 	initial begin
 		// Initialize Inputs
