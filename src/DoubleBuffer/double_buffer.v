@@ -1,11 +1,10 @@
-`include "vga_defs.v"
-`include "pack_array.v"
+`include "../../includes/vga_defs.v"
+`include "../../includes/pack_array.v"
 
-module main(clk, resetn, pixel, vline_sel, hline_sel);
+module double_buffer(clk, resetn, pixel, vline_sel, hline_sel);
 	input clk;
 	input resetn;
 	output [`PIXEL_SIZE-1:0] pixel;
-//	output [`PACKED_SIZE-1:0] packed_buffer;
 	output reg [log2(`HEIGHT):0] hline_sel;
 	output reg [log2(`WIDTH) :0] vline_sel;
 	
@@ -43,7 +42,6 @@ module main(clk, resetn, pixel, vline_sel, hline_sel);
 	
 		genvar i, j;
 		for (i = 0; i < `HEIGHT; i = i + 1) begin : vertical_raster
-//			assign packed_buffer[(i+1)*`WIDTH*`PIXEL_SIZE - 1 : (i*`WIDTH)*`PIXEL_SIZE] = curr_line[][];
 			for (j = 0; j < `WIDTH; j = j + 1) begin : horizontal_raster
 				// Toggle between the buffers with buf_sel
 				assign buffer[i][j] = buf_sel ? buffer_1[i][j] : buffer_0[i][j];
@@ -64,29 +62,9 @@ module main(clk, resetn, pixel, vline_sel, hline_sel);
 	endgenerate
 	
 	//assign curr_line/*[`WIDTH-1:0][`PIXEL_SIZE-1:0]*/ = buffer[hline_sel]/*[`WIDTH-1:0][`PIXEL_SIZE-1:0]*/;
-//	`PACK_1D_ARRAY(`PIXEL_SIZE,`WIDTH, curr_line, packed_buffer)
-//	`PACK_2D_ARRAY(`WIDTH, `HEIGHT, `PIXEL_SIZE, buffer, packed_buffer)
 	always @(posedge clk) begin
 		vline_sel <= (vline_sel + 1)%`WIDTH;
 		if (vline_sel == 0)
 			hline_sel <= (hline_sel + 1)%`HEIGHT;
-	end
-endmodule
-
-
-module clk_div (input clk, input [31:0] div, output reg slow_clk);
-	reg [31:0] counter;
-	
-	initial begin
-		counter <= 0;
-		slow_clk <= 0;
-	end
-	
-	always @(posedge clk) begin
-		counter <= counter + 1;
-		if (counter == div) begin
-			counter <= 0;
-			slow_clk = ~slow_clk;
-		end
 	end
 endmodule

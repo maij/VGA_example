@@ -15,3 +15,5 @@
 *.xrpt
 *.xml
 DoubleBuffer/isim/*
+*.jhd
+*.sym

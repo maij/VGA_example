@@ -1,6 +1,6 @@
 `timescale 1ns / 10ps
-`include "vga_defs.v"
-`include "pack_array.v"
+`include "../../includes/vga_defs.v"
+`include "../../includes/pack_array.v"
 
 ////////////////////////////////////////////////////////////////////////////////
 // Company: 
@@ -24,7 +24,7 @@
 // 
 ////////////////////////////////////////////////////////////////////////////////
 
-module main_tbw;
+module double_buffer_tbw;
 
 	// Inputs
 	reg clk;
@@ -47,17 +47,15 @@ module main_tbw;
 	wire [`PIXEL_SIZE-1:0] buffer [`WIDTH-1:0];
 	
 	// Instantiate the Unit Under Test (UUT)
-	main uut (
+	double_buffer uut (
 		.clk(clk), 
 		.resetn(resetn), 
 		.packed_buffer(packed_buffer),
 		.hline_sel(hline_sel)
 	);
 
-	//`UNPACK_2D_ARRAY(`WIDTH, `HEIGHT, `PIXEL_SIZE, packed_buffer, buffer);
-	
 	generate 
-	genvar j;
+		genvar j;
 		for (j = 0; j < `WIDTH; j = j + 1) begin : horizontal_raster
 			assign buffer[j][`PIXEL_SIZE-1:0] = packed_buffer[(j+1)*`PIXEL_SIZE-1:j*`PIXEL_SIZE];
 		end
