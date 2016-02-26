@@ -1,4 +1,4 @@
-`timescale 1ns / 1ps
+`timescale 1ns / 100ps
 //////////////////////////////////////////////////////////////////////////////////
 // Company: 
 // Engineer: 
@@ -19,7 +19,23 @@
 //
 //////////////////////////////////////////////////////////////////////////////////
 `include "../includes/vga_defs.v"
+`include "../includes/colours.v"
 
+`define FACE_X (`WIDTH/2)
+`define FACE_Y (`HEIGHT/2)
+
+`define FACE_RAD_SQ (((3*`HEIGHT)/8)**2)
+`define FACE_RAD_LO_LIM (`FACE_RAD_SQ - `FACE_RAD_SQ/128)
+`define FACE_RAD_HI_LIM (`FACE_RAD_SQ + `FACE_RAD_SQ/128)
+
+`define LEFT_EYE_X   (240)
+`define LEFT_EYE_Y   (280)
+`define RIGHT_EYE_X  (380)
+`define RIGHT_EYE_Y  (280)
+
+`define EYE_RAD_SQ     ((`HEIGHT/16)**2)
+`define EYE_RAD_LO_LIM (`EYE_RAD_SQ - `EYE_RAD_SQ/128)
+`define EYE_RAD_HI_LIM (`EYE_RAD_SQ + `EYE_RAD_SQ/128)
 
 module VGA_example(
 		input clk,
@@ -40,6 +56,7 @@ module VGA_example(
 		
 		output FlashRp,
 		output FlashCS,
+		
 		// VGA Signals
 		output [2:0] vgaRed,
 		output [2:0] vgaGreen,
@@ -48,7 +65,7 @@ module VGA_example(
 		output Vsync      
     );
 	 
-wire [`PIXEL_SIZE-1:0] pixel;
+reg [`PIXEL_SIZE-1:0] pixel;
 
 assign vgaRed[2:0]   = pixel[7:5];
 assign vgaGreen[2:0] = pixel[4:2];
@@ -88,9 +105,14 @@ initial begin
 `else
 	$display("Resolution : 640x480 @ 60Hz");
 `endif
+	$display("Face Centre      = (%d,%d)", `FACE_X, `FACE_Y);
+	$display("Face Range       = [%d,%d]", `FACE_RAD_LO_LIM, `FACE_RAD_HI_LIM);
+	$display("Left Eye Centre  = (%d,%d)", `LEFT_EYE_X, `LEFT_EYE_Y);
+	$display("Right Eye Centre = (%d,%d)", `RIGHT_EYE_X, `RIGHT_EYE_Y);
+	$display("Right Eye Range  = [%d,%d]", `EYE_RAD_LO_LIM, `EYE_RAD_HI_LIM);
 end
 
-assign pixel = blank ? `PIXEL_SIZE'b0 : MemDB;
+//assign pixel = blank ? `PIXEL_SIZE'b0 : MemDB;
 
 //double_buffer buffer(clk, resetn, pixel, vline_sel, hline_sel);
 //reg [31:0] blank_count = 0;
@@ -104,10 +126,31 @@ assign pixel = blank ? `PIXEL_SIZE'b0 : MemDB;
 `endif
 		if (~blank) begin
 			MemAdr = (hcount - 1) + vcount*`WIDTH;
+//			$display("Face Calc: a^2 + b^2 = %d,  c^2 = %d", (hcount - `WIDTH/2)**2 + (vcount - `HEIGHT/2)**2, (`WIDTH/2)**2);
+			if (
+					( (hcount - `FACE_X)**2 + (vcount - `FACE_Y)**2 <= `FACE_RAD_HI_LIM) &&
+					( (hcount - `FACE_X)**2 + (vcount - `FACE_Y)**2 >= `FACE_RAD_LO_LIM) 
+				)
+    	   begin
+				pixel <= `YELLOW; // Yellow circle outline
+				$display("FACE: x = %3d y=%3d", hcount, vcount);
+
+			// Left eye or right eye
+			end else if ( 
+							  ( (hcount - `LEFT_EYE_X )**2 + (vcount - `LEFT_EYE_Y )**2 <= `EYE_RAD_SQ) || 
+							  ( (hcount - `RIGHT_EYE_X)**2 + (vcount - `RIGHT_EYE_Y)**2 <= `EYE_RAD_SQ) 
+							) 
+			begin
+				pixel <= `RED;
+				$display("EYE : x = %3d y=%3d", hcount, vcount);
+			end else 
+				pixel <= `BLACK; // Black default
+				
 //			blank_count = 0;
 //			$display("hcount = %d", hcount);
 //			$display("vcount = %d", vcount);
 		end else begin
+			pixel <= `BLACK;
 //			blank_count = blank_count + 1;
 //			$display("Blanking time = %d", blank_count);
 		end

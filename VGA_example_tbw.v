@@ -1,4 +1,4 @@
-`timescale 1ns / 1ps
+`timescale 1ns / 100ps
 
 ////////////////////////////////////////////////////////////////////////////////
 // Company: 
@@ -21,6 +21,7 @@
 // Additional Comments:
 // 
 ////////////////////////////////////////////////////////////////////////////////
+`include "./includes/colours.v"
 
 module VGA_example_tbw;
 
@@ -29,7 +30,7 @@ module VGA_example_tbw;
 	reg resetn;
 
 	// Outputs
-	wire [22:0] MemAdr;
+	wire [26:1] MemAdr;
 	wire MemOE;
 	wire MemWR;
 	wire RamAdv;
@@ -41,6 +42,9 @@ module VGA_example_tbw;
 	wire RamWait;
 	wire FlashRp;
 	wire FlashCS;
+	wire [7:0] pixel;
+	wire Hsync;
+	wire Vsync;
 
 	// Bidirs
 	wire [15:0] MemDB;
@@ -61,7 +65,12 @@ module VGA_example_tbw;
 		.RamUB(RamUB), 
 		.RamWait(RamWait), 
 		.FlashRp(FlashRp), 
-		.FlashCS(FlashCS)
+		.FlashCS(FlashCS),
+		.vgaRed(pixel[7:5]),
+		.vgaGreen(pixel[4:2]),
+		.vgaBlue(pixel[1:0]),
+		.Hsync(Hsync),
+		.Vsync(Vsync)   
 	);
 
 	initial begin
