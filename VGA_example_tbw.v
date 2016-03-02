@@ -75,15 +75,15 @@ module VGA_example_tbw;
 
 	initial begin
 		// Initialize Inputs
-		clk = 0;
-		resetn = 0;
+		clk <= 0;
+		resetn <= 0;
 
 		// Wait 100 ns for global reset to finish
 		#100;
-      resetn = 1;
+      resetn <= 1;
 		// Add stimulus here
 		forever
-			clk = #10 ~clk;
+			clk <= #10 ~clk;
 	end
       
 endmodule
