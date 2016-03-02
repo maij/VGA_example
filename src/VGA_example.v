@@ -39,7 +39,6 @@
 `define EYE_RAD_LO_LIM (`EYE_RAD_SQ - `EYE_RAD_SQ/128)
 `define EYE_RAD_HI_LIM (`EYE_RAD_SQ + `EYE_RAD_SQ/128)
 
-
 module VGA_example(
 		input clk,
 		input resetn,
@@ -73,6 +72,7 @@ reg [`PIXEL_SIZE-1:0] pixel;
 assign vgaRed[2:0]   = pixel[7:5];
 assign vgaGreen[2:0] = pixel[4:2];
 assign vgaBlue[2:1]  = pixel[1:0];
+
 // To prevent errors when generating bit file, assign all outputs
 assign MemDB   = 16'b0;
 assign MemOE   = 0;
@@ -87,7 +87,9 @@ assign RamWait = 0;
 
 assign FlashRp = 0;
 assign FlashCS = 0;
-		
+
+initial
+   pixel <= `PIXEL_SIZE'b0;
 
 // VGA Inputs
 wire clk_40MHz;
