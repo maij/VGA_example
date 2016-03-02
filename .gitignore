@@ -59,3 +59,10 @@ src/ipcore_dir/clkgen/implement/
 src/ipcore_dir/clkgen/example_design/
 src/ipcore_dir/clkgen/doc/
 *.cgp
+*.ut
+*.xwbt
+*.tcl
+*.debug
+*.bgn
+*.bit
+*.drc
