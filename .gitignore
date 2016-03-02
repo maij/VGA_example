@@ -46,3 +46,10 @@ xst/
 *.wdb
 *.schlog
 sch2HdlBatchFile
+*.ut
+*.xwbt
+*.tcl
+*.debug
+*.bgn
+*.bit
+*.drc
