@@ -1,4 +1,4 @@
-ipcore_dir/
+/ipcore_dir/
 isim/
 _ngo/
 iseconfig/
@@ -46,3 +46,16 @@ xst/
 *.wdb
 *.schlog
 sch2HdlBatchFile
+*.asy
+*.veo
+*.xco
+*.xdc
+src/ipcore_dir/tmp/
+*.tcl
+*.ncf
+*.key
+src/ipcore_dir/clkgen/simulation/
+src/ipcore_dir/clkgen/implement/
+src/ipcore_dir/clkgen/example_design/
+src/ipcore_dir/clkgen/doc/
+*.cgp
