@@ -73,6 +73,21 @@ reg [`PIXEL_SIZE-1:0] pixel;
 assign vgaRed[2:0]   = pixel[7:5];
 assign vgaGreen[2:0] = pixel[4:2];
 assign vgaBlue[2:1]  = pixel[1:0];
+// To prevent errors when generating bit file, assign all outputs
+assign MemDB   = 16'b0;
+assign MemOE   = 0;
+assign MemWR   = 0;
+assign RamAdv  = 0;
+assign RamCS   = 0;
+assign RamClk  = 0; 
+assign RamCRE  = 0;
+assign RamLB   = 0;
+assign RamUB   = 0;
+assign RamWait = 0;
+
+assign FlashRp = 0;
+assign FlashCS = 0;
+		
 
 // VGA Inputs
 wire clk_40MHz;
