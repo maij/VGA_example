@@ -147,33 +147,53 @@ end
 		if (~blank) begin
 			MemAdr = (hcount - 1) + vcount*`WIDTH;
 //			$display("Face Calc: a^2 + b^2 = %d,  c^2 = %d", (hcount - `WIDTH/2)**2 + (vcount - `HEIGHT/2)**2, (`WIDTH/2)**2);
-			if (
-					( `SQUARED(hcount - `FACE_X) + `SQUARED(vcount - `FACE_Y) <= `FACE_RAD_HI_LIM) &&
-					( `SQUARED(hcount - `FACE_X) + `SQUARED(vcount - `FACE_Y) >= `FACE_RAD_LO_LIM) 
-				)
-    	   begin
-				pixel <= `YELLOW; // Yellow circle outline
-				$display("FACE: x = %3d y=%3d", hcount, vcount);
+//			if (
+//					( `SQUARED(hcount - `FACE_X) + `SQUARED(vcount - `FACE_Y) <= `FACE_RAD_HI_LIM) &&
+//					( `SQUARED(hcount - `FACE_X) + `SQUARED(vcount - `FACE_Y) >= `FACE_RAD_LO_LIM) 
+//				)
+//    	   begin
+////				pixel <= `YELLOW; // Yellow circle outline
+//				$display("FACE: x = %3d y=%3d", hcount, vcount);
+//
+//			// Left eye or right eye
+//			end else if ( 
+//							  ( `SQUARED(hcount - `LEFT_EYE_X ) + `SQUARED(vcount - `LEFT_EYE_Y ) <= `EYE_RAD_SQ) || 
+//							  ( `SQUARED(hcount - `RIGHT_EYE_X) + `SQUARED(vcount - `RIGHT_EYE_Y) <= `EYE_RAD_SQ) 
+//							) 
+//			begin
+////				pixel <= `RED;
+//				$display("EYE : x = %3d y=%3d", hcount, vcount);
+//			end else 
+//				pixel <= `WHITE; // Black default
+//				
+////			blank_count = 0;
+////			$display("hcount = %d", hcount);
+////			$display("vcount = %d", vcount);
+//		end else begin
+//			pixel <= `WHITE;
+////			blank_count = blank_count + 1;
+////			$display("Blanking time = %d", blank_count);
+//		end
+// Four quadrants
+//			if      (hcount < `WIDTH/2 && vcount < `HEIGHT/2)
+//				pixel <= `RED;
+//			else if (hcount < `WIDTH/2 && vcount >= `HEIGHT/2)
+//				pixel <= `GREEN;
+//			else if (hcount >= `WIDTH/2 && vcount < `HEIGHT/2)
+//				pixel <= `BLUE;
+//			else
+//				pixel <= `WHITE;
 
-			// Left eye or right eye
-			end else if ( 
-							  ( `SQUARED(hcount - `LEFT_EYE_X ) + `SQUARED(vcount - `LEFT_EYE_Y ) <= `EYE_RAD_SQ) || 
-							  ( `SQUARED(hcount - `RIGHT_EYE_X) + `SQUARED(vcount - `RIGHT_EYE_Y) <= `EYE_RAD_SQ) 
-							) 
-			begin
-				pixel <= `RED;
-				$display("EYE : x = %3d y=%3d", hcount, vcount);
-			end else 
-				pixel <= `BLACK; // Black default
-				
-//			blank_count = 0;
-//			$display("hcount = %d", hcount);
-//			$display("vcount = %d", vcount);
-		end else begin
+// Eesti Flag
+			if      (vcount < (`HEIGHT*43)/128)
+				pixel <= `BLUE | 8'b00010100;
+			else if      (vcount < (`HEIGHT*86)/128)
+				pixel <= `BLACK;
+			else
+				pixel <= `WHITE;
+
+		end else 
 			pixel <= `BLACK;
-//			blank_count = blank_count + 1;
-//			$display("Blanking time = %d", blank_count);
-		end
 	end
 
 endmodule
