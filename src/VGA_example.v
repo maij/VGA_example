@@ -39,25 +39,14 @@
 `define EYE_RAD_LO_LIM (`EYE_RAD_SQ - `EYE_RAD_SQ/128)
 `define EYE_RAD_HI_LIM (`EYE_RAD_SQ + `EYE_RAD_SQ/128)
 
+`define GRID_SIZE 32
+
 module VGA_example(
 		input clk,
 		input resetn,
-		
-		// Cellular RAM signals
-		output reg [26:1] MemAdr,
-		inout  [15:0] MemDB,
-		output MemOE,
-		output MemWR,
-		output RamAdv,
-		output RamCS,  
-		output RamClk, 
-		output RamCRE, 
-		output RamLB, 
-		output RamUB,  
-		output RamWait,
-		
-		output FlashRp,
-		output FlashCS,
+        
+        input clk_switch,
+        input clk_btn,
 		
 		// VGA Signals
 		output [2:0] vgaRed,
@@ -74,20 +63,6 @@ assign vgaGreen[2:0] = pixel[4:2];
 assign vgaBlue[2:1]  = pixel[1:0];
 
 // To prevent errors when generating bit file, assign all outputs
-assign MemDB   = 16'b0;
-assign MemOE   = 0;
-assign MemWR   = 0;
-assign RamAdv  = 0;
-assign RamCS   = 0;
-assign RamClk  = 0; 
-assign RamCRE  = 0;
-assign RamLB   = 0;
-assign RamUB   = 0;
-assign RamWait = 0;
-
-assign FlashRp = 0;
-assign FlashCS = 0;
-
 initial
    pixel <= `PIXEL_SIZE'b0;
 
@@ -102,7 +77,13 @@ wire [10:0] vcount;
 
 // Generate clocks for 25MHz and 40MHz
 // Reset is active high for clkgen
+
+// Game of Life stuff
+wire [1023:0] grid;
+assign con_clk = clk_switch ? slow_clk : clk_btn;
 clkgen i_clkgen(.CLK_IN1(clk), .CLK_40MHZ(clk_40MHz), .CLK_25MHZ(clk_25MHz), .RESET(~resetn));
+conway i_conway(.clk(con_clk), .resetn(resetn), .grid_pack(grid));
+shiftclock i_shiftclock(.clk_in(clk_25MHz), .clk_out(slow_clk));
 
 /*
  * NOTE: It appears that hcount goes from 1 to 640, but vcount goes from 0 to 479
@@ -125,55 +106,17 @@ initial begin
 `else
 	$display("Resolution : 640x480 @ 60Hz");
 `endif
-	$display("Face Centre      = (%d,%d)", `FACE_X, `FACE_Y);
-	$display("Face Range       = [%d,%d]", `FACE_RAD_LO_LIM, `FACE_RAD_HI_LIM);
-	$display("Left Eye Centre  = (%d,%d)", `LEFT_EYE_X, `LEFT_EYE_Y);
-	$display("Right Eye Centre = (%d,%d)", `RIGHT_EYE_X, `RIGHT_EYE_Y);
-	$display("Right Eye Range  = [%d,%d]", `EYE_RAD_LO_LIM, `EYE_RAD_HI_LIM);
 end
 
-//assign pixel = blank ? `PIXEL_SIZE'b0 : MemDB;
-
-//double_buffer buffer(clk, resetn, pixel, vline_sel, hline_sel);
-//reg [31:0] blank_count = 0;
-//initial
-//	blank_count = 0;
-	
 `ifdef HIGH_RES
 	always @(posedge clk_40MHz) begin
 `else
 	always @(posedge clk_25MHz) begin
 `endif
 		if (~blank) begin
-			MemAdr = (hcount - 1) + vcount*`WIDTH;
-//			$display("Face Calc: a^2 + b^2 = %d,  c^2 = %d", (hcount - `WIDTH/2)**2 + (vcount - `HEIGHT/2)**2, (`WIDTH/2)**2);
-//			if (
-//					( `SQUARED(hcount - `FACE_X) + `SQUARED(vcount - `FACE_Y) <= `FACE_RAD_HI_LIM) &&
-//					( `SQUARED(hcount - `FACE_X) + `SQUARED(vcount - `FACE_Y) >= `FACE_RAD_LO_LIM) 
-//				)
-//    	   begin
-////				pixel <= `YELLOW; // Yellow circle outline
-//				$display("FACE: x = %3d y=%3d", hcount, vcount);
-//
-//			// Left eye or right eye
-//			end else if ( 
-//							  ( `SQUARED(hcount - `LEFT_EYE_X ) + `SQUARED(vcount - `LEFT_EYE_Y ) <= `EYE_RAD_SQ) || 
-//							  ( `SQUARED(hcount - `RIGHT_EYE_X) + `SQUARED(vcount - `RIGHT_EYE_Y) <= `EYE_RAD_SQ) 
-//							) 
-//			begin
-////				pixel <= `RED;
-//				$display("EYE : x = %3d y=%3d", hcount, vcount);
-//			end else 
-//				pixel <= `WHITE; // Black default
-//				
-////			blank_count = 0;
-////			$display("hcount = %d", hcount);
-////			$display("vcount = %d", vcount);
-//		end else begin
-//			pixel <= `WHITE;
-////			blank_count = blank_count + 1;
-////			$display("Blanking time = %d", blank_count);
-//		end
+            pixel <= (grid[((vcount/15*`GRID_SIZE) + (hcount - 1)/20)]) ? `WHITE : `BLACK ;
+//            pixel <= `WHITE;
+//        end
 // Four quadrants
 //			if      (hcount < `WIDTH/2 && vcount < `HEIGHT/2)
 //				pixel <= `RED;
@@ -185,12 +128,12 @@ end
 //				pixel <= `WHITE;
 
 // Eesti Flag
-			if      (vcount < (`HEIGHT*43)/128)
-				pixel <= `BLUE | 8'b00010100;
-			else if      (vcount < (`HEIGHT*86)/128)
-				pixel <= `BLACK;
-			else
-				pixel <= `WHITE;
+//			if      (vcount < (`HEIGHT*43)/128)
+//				pixel <= `BLUE | 8'b00010100;
+//			else if      (vcount < (`HEIGHT*86)/128)
+//				pixel <= `BLACK;
+//			else
+//				pixel <= `WHITE;
 
 		end else 
 			pixel <= `BLACK;
