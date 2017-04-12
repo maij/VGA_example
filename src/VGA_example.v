@@ -21,24 +21,6 @@
 `include "../includes/vga_defs.v"
 `include "../includes/colours.v"
 
-`define SQUARED(INPUT) (INPUT*INPUT)
-
-`define FACE_X (`WIDTH/2)
-`define FACE_Y (`HEIGHT/2)
-
-`define FACE_RAD_SQ (`SQUARED((3*`HEIGHT)/8))
-`define FACE_RAD_LO_LIM (`FACE_RAD_SQ - `FACE_RAD_SQ/128)
-`define FACE_RAD_HI_LIM (`FACE_RAD_SQ + `FACE_RAD_SQ/128)
-
-`define LEFT_EYE_X   (240)
-`define LEFT_EYE_Y   (280)
-`define RIGHT_EYE_X  (380)
-`define RIGHT_EYE_Y  (280)
-
-`define EYE_RAD_SQ     (`SQUARED(`HEIGHT/16))
-`define EYE_RAD_LO_LIM (`EYE_RAD_SQ - `EYE_RAD_SQ/128)
-`define EYE_RAD_HI_LIM (`EYE_RAD_SQ + `EYE_RAD_SQ/128)
-
 `define GRID_SIZE 32
 
 module VGA_example(
@@ -53,7 +35,20 @@ module VGA_example(
 		output [2:0] vgaGreen,
 		output [2:1] vgaBlue,
 		output Hsync,
-		output Vsync      
+		output Vsync
+        // Ram Access
+//        inout    [15:0]  MemDB,
+//        output   [25:1]  MemAdr, 	// 26-bit address sent to flash memory
+//
+//        output MemOE,  
+//        output MemWR, 
+//        output RamClk, 
+//        output RamAdv, 
+//        input  RamWait,  
+//        output RamCS,  
+//        output RamUB,
+//        output RamLB,  
+//        output RamCRE
     );
 	 
 reg [`PIXEL_SIZE-1:0] pixel;
@@ -75,12 +70,11 @@ wire blank;
 wire [10:0] hcount;
 wire [10:0] vcount;
 
-// Generate clocks for 25MHz and 40MHz
-// Reset is active high for clkgen
-
 // Game of Life stuff
 wire [1023:0] grid;
 assign con_clk = clk_switch ? slow_clk : clk_btn;
+// Generate clocks for 25MHz and 40MHz
+// Reset is active high for clkgen
 clkgen i_clkgen(.CLK_IN1(clk), .CLK_40MHZ(clk_40MHz), .CLK_25MHZ(clk_25MHz), .RESET(~resetn));
 conway i_conway(.clk(con_clk), .resetn(resetn), .grid_pack(grid));
 shiftclock i_shiftclock(.clk_in(clk_25MHz), .clk_out(slow_clk));
@@ -114,7 +108,13 @@ end
 	always @(posedge clk_25MHz) begin
 `endif
 		if (~blank) begin
-            pixel <= (grid[((vcount/15*`GRID_SIZE) + (hcount - 1)/20)]) ? `WHITE : `BLACK ;
+            // Offsetting
+            if (hcount == 80 || hcount == 561 || vcount == 0 || vcount == `HEIGHT-1)
+                pixel <= `RED;
+            if (hcount > 80 && hcount <= 560)
+                pixel <= (grid[((vcount/15*`GRID_SIZE) + (hcount-80 - 1)/15)]) ? `WHITE : `BLACK ;
+            else
+                pixel <= `BLACK;
 //            pixel <= `WHITE;
 //        end
 // Four quadrants

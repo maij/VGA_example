@@ -3,7 +3,7 @@ module shiftclock (
         output reg clk_out);
         
         reg [25:0] counter = 26'b0;
-        parameter C0 = 26'd12500000;
+        parameter C0 = 26'd2500000;
         initial 
             clk_out <= 0;
             
