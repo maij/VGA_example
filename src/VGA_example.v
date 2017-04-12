@@ -29,6 +29,7 @@ module VGA_example(
         
         input clk_switch,
         input clk_btn,
+        input [1:0] init_sel,
 		
 		// VGA Signals
 		output [2:0] vgaRed,
@@ -76,7 +77,7 @@ assign con_clk = clk_switch ? slow_clk : clk_btn;
 // Generate clocks for 25MHz and 40MHz
 // Reset is active high for clkgen
 clkgen i_clkgen(.CLK_IN1(clk), .CLK_40MHZ(clk_40MHz), .CLK_25MHZ(clk_25MHz), .RESET(~resetn));
-conway i_conway(.clk(con_clk), .resetn(resetn), .grid_pack(grid));
+conway i_conway(.clk(con_clk), .resetn(resetn), .init_sel(init_sel), .grid_pack(grid));
 shiftclock i_shiftclock(.clk_in(clk_25MHz), .clk_out(slow_clk));
 
 /*

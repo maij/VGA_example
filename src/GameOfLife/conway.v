@@ -21,6 +21,7 @@
 module conway(
     input clk,
     input resetn,
+    input [1:0] init_sel,
     output reg [1023:0] grid_pack
     );
     
@@ -92,7 +93,7 @@ module conway(
                             neighbours[i][j] <= grid[i-1][j] + grid[i+1][j] + grid[i+1][j-1] +
                                                grid[i][j-1] + grid[i-1][j-1];
                         end
-//                        neighbours[i][j] = 3;
+//                        neighbours[i] [j] = 3;
                     end else begin
                         neighbours[i][j] <= grid[i-1][j-1] + grid[i-1][j] + grid[i-1][j+1] +
                                            grid[i][j-1] /*+ grid[i][j]*/ + grid[i][j+1]   + 
@@ -104,6 +105,31 @@ module conway(
                 // Update the game, on reset load an initial state
                 always @(posedge clk, negedge resetn) begin
                     if (~resetn)
+                        case (init_sel)
+                            2'd0: // blinker
+                                if ((i == 16 && j == 15) || (i == 16 && j == 16) || (i == 16 && j == 17)) 
+                                    grid[i][j] <= 1;
+                                else
+                                    grid[i][j] <= 0;
+                            2'd1: // glider
+                                if ((i == 17 && j == 16) ||
+                                    (i == 16 && j == 17) || 
+                                    (i == 15 && (j == 15 || j == 16 || j == 17)))
+                                    grid[i][j] <= 1;
+                                else
+                                    grid[i][j] <= 0;
+                            
+                            2'd2: grid[i][j] <= 0; // blank
+                            
+                            2'd3: // pulsar
+                                if (((i == 16+6 || i == 16+1 || i == 16-1 || i == 16-6) 
+                                    && (j == 12 || j == 13 || j == 14 || j == 18 || j == 19 || j == 20)) ||
+                                    ((i == 16+4 || i == 16+3 || i == 16+2 || i == 16-2 || i == 16-3 || i == 16-4) 
+                                    && (j == 10 || j == 15 || j == 17 || j == 22)))
+                                    grid[i][j] <= 1;
+                                else
+                                    grid[i][j] <= 0;
+                        endcase
 //                        if ((i == 16 && j == 15) || (i == 16 && j == 16) || (i == 16 && j == 17)) // blinker
 //                            grid[i][j] <= 1;
 
@@ -114,13 +140,13 @@ module conway(
 //                            grid[i][j] <= 1;
 //                            
                         // Pulsar
-                        if (((i == 16+6 || i == 16+1 || i == 16-1 || i == 16-6) 
-                            && (j == 12 || j == 13 || j == 14 || j == 18 || j == 19 || j == 20)) ||
-                            ((i == 16+4 || i == 16+3 || i == 16+2 || i == 16-2 || i == 16-3 || i == 16-4) 
-                            && (j == 10 || j == 15 || j == 17 || j == 22)))
-                            grid[i][j] <= 1;
-                        else
-                            grid[i][j] <= 0;
+//                        if (((i == 16+6 || i == 16+1 || i == 16-1 || i == 16-6) 
+//                            && (j == 12 || j == 13 || j == 14 || j == 18 || j == 19 || j == 20)) ||
+//                            ((i == 16+4 || i == 16+3 || i == 16+2 || i == 16-2 || i == 16-3 || i == 16-4) 
+//                            && (j == 10 || j == 15 || j == 17 || j == 22)))
+//                            grid[i][j] <= 1;
+//                        else
+//                            grid[i][j] <= 0;
                     else
                         grid[i][j] <= newGrid[i][j];
                 end
